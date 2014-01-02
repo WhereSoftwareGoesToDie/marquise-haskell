@@ -25,7 +25,7 @@ foreign import ccall unsafe "marquise.h marquise_consumer_shutdown"
     c_marquise_consumer_shutdown :: Ptr ASConsumer -> IO ()
 
 foreign import ccall unsafe "marquise.h marquise_send_text"
-    c_marquise_send_text :: Ptr CString -> Ptr CString -> CSize -> CString -> CSize -> Word64 -> IO ()
+    c_marquise_send_text :: Ptr ASConnection -> Ptr CString -> Ptr CString -> CSize -> CString -> CSize -> Word64 -> IO (CInt)
 
 foreign import ccall unsafe "string.h strerror"
     c_strerror :: Errno -> IO (Ptr CChar)

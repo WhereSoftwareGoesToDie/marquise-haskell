@@ -6,17 +6,16 @@ module System.Marquise.Error
     errno,
     cFunction,
     strerror,
-    checkError,
-    checkError',
-    checkError_,
+    throwIfNull,
+    throwIfMinus1,
 ) where
 
 import Control.Exception
-import Control.Monad (void)
 import Data.Typeable
 import Foreign.C.Error
-import Foreign.C.String
 import Foreign.C.Types
+import Foreign.Ptr
+import Foreign.C.String
 import System.Marquise.FFI as F
 
 -- | An error indicated by librados, usually in the form of a negative return
@@ -39,19 +38,20 @@ instance Exception MarquiseError
 --
 -- This is needed for a few methods like rados_read that throw an error or
 -- return the bytes read via the same CInt.
-checkError :: String -> IO CInt -> IO Int
-checkError function action = do
-    checkError' function action >>= either throwIO return
+throwIf :: (a -> Bool) -> String -> IO a -> IO a
+throwIf condition c_function action = do
+    r <- action
+    if (condition r) then throwMarquiseError c_function
+                     else return r
 
-checkError' :: String -> IO CInt -> IO (Either MarquiseError Int)
-checkError' function action = do
-    n <- action
-    if n < 0
-        then do
-            let errno = (-n)
-            strerror <- peekCString =<< F.c_strerror (Errno errno)
-            return $ Left $ MarquiseError (fromIntegral errno) function strerror
-        else return $ Right $ fromIntegral n
+throwIfNull :: String -> IO (Ptr a) -> IO (Ptr a)
+throwIfNull = throwIf (== nullPtr)
 
-checkError_ :: String -> IO CInt -> IO ()
-checkError_ desc action = void $ checkError desc action
+throwIfMinus1 :: String -> IO CInt -> IO CInt
+throwIfMinus1 = throwIf (== -1)
+
+throwMarquiseError :: String -> IO a
+throwMarquiseError c_function = do
+    (Errno n) <- getErrno
+    strerror <- peekCString =<< F.c_strerror (Errno n)
+    throwIO $ MarquiseError (fromIntegral n) c_function strerror
