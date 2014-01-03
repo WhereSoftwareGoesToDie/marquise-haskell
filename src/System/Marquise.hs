@@ -25,7 +25,7 @@ import Control.Monad.Cont
 import Control.Monad.Reader
 import qualified Data.ByteString as B
 import qualified Data.Vector.Storable as SV
-import Foreign hiding (Pool, newPool, void)
+import Foreign hiding (void)
 import Foreign.C.String
 import Foreign.C.Types
 import System.Clock
