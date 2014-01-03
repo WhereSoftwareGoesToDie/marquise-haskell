@@ -10,9 +10,9 @@ module System.Marquise.Error
 import Control.Exception
 import Data.Typeable
 import Foreign.C.Error
+import Foreign.C.String
 import Foreign.C.Types
 import Foreign.Ptr
-import Foreign.C.String
 import System.Marquise.FFI as F
 
 -- | An error returned by libmarquise

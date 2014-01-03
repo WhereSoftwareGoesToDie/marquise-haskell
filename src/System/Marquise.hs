@@ -20,15 +20,15 @@ module System.Marquise
 import qualified System.Marquise.Error as E
 import qualified System.Marquise.FFI as F
 
-import System.Clock
-import Control.Monad.Cont
 import Control.Applicative
-import Foreign hiding (Pool, newPool, void)
-import Foreign.C.String
-import Foreign.C.Types
+import Control.Monad.Cont
 import Control.Monad.Reader
 import qualified Data.ByteString as B
 import qualified Data.Vector.Storable as SV
+import Foreign hiding (Pool, newPool, void)
+import Foreign.C.String
+import Foreign.C.Types
+import System.Clock
 
 newtype Marquise a = Marquise (ReaderT (Ptr F.MarquiseConnection) IO a)
     deriving (Monad, MonadIO, MonadReader (Ptr F.MarquiseConnection))
@@ -74,7 +74,7 @@ withConnFieldsValuesLength :: String
                            -> Marquise ()
 withConnFieldsValuesLength c_function tag_pairs f = do
     connection <- ask
-    liftIO $  void $ 
+    liftIO $  void $
         withCStringArray (map fst tag_pairs) $ \fields_ptr ->
         withCStringArray (map snd tag_pairs) $ \values_ptr ->
             E.throwIfMinus1 c_function $ f connection
@@ -89,7 +89,7 @@ withConnFieldsValuesLength c_function tag_pairs f = do
 
 sendText :: [(B.ByteString, B.ByteString)] -> Word64 -> B.ByteString -> Marquise ()
 sendText tag_pairs timestamp text =
-    withConnFieldsValuesLength "marquise_send_text" tag_pairs $ \c f v l -> 
+    withConnFieldsValuesLength "marquise_send_text" tag_pairs $ \c f v l ->
             B.useAsCStringLen text $ \(text_ptr, text_len) ->
                     F.c_marquise_send_text c f v l
                                            text_ptr
@@ -98,22 +98,22 @@ sendText tag_pairs timestamp text =
 
 sendInt :: [(B.ByteString, B.ByteString)] -> Word64 -> Int64 -> Marquise ()
 sendInt tag_pairs timestamp int =
-    withConnFieldsValuesLength "marquise_send_text" tag_pairs $ \c f v l -> 
+    withConnFieldsValuesLength "marquise_send_text" tag_pairs $ \c f v l ->
                 F.c_marquise_send_int c f v l int timestamp
 
 sendReal :: [(B.ByteString, B.ByteString)] -> Word64 -> Rational -> Marquise ()
 sendReal tag_pairs timestamp r =
-    withConnFieldsValuesLength "marquise_send_real" tag_pairs $ \c f v l -> 
+    withConnFieldsValuesLength "marquise_send_real" tag_pairs $ \c f v l ->
                 F.c_marquise_send_real c f v l (fromRational r) timestamp
 
 sendCounter :: [(B.ByteString, B.ByteString)] -> Word64 -> Marquise ()
 sendCounter tag_pairs timestamp =
-    withConnFieldsValuesLength "marquise_send_counter" tag_pairs $ \c f v l -> 
+    withConnFieldsValuesLength "marquise_send_counter" tag_pairs $ \c f v l ->
                 F.c_marquise_send_counter c f v l timestamp
 
 sendBinary :: [(B.ByteString, B.ByteString)] -> Word64 -> B.ByteString -> Marquise ()
 sendBinary tag_pairs timestamp text =
-    withConnFieldsValuesLength "marquise_send_binary" tag_pairs $ \c f v l -> 
+    withConnFieldsValuesLength "marquise_send_binary" tag_pairs $ \c f v l ->
             B.useAsCStringLen text $ \(text_ptr, text_len) ->
                     F.c_marquise_send_binary c f v l
                                            text_ptr
