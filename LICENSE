@@ -1,6 +1,6 @@
-Haskell bindings to librados
+Haskell bindings to libmarquise
 
-Copyright © 2013 Anchor Systems, Pty Ltd
+Copyright © 2014 Anchor Systems, Pty Ltd
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

@@ -2,10 +2,7 @@
 {-# LANGUAGE RecordWildCards    #-}
 module System.Marquise.Error
 (
-    MarquiseError(MarquiseError),
-    errno,
-    cFunction,
-    strerror,
+    MarquiseError(MarquiseError, errno, cFunction, strerror),
     throwIfNull,
     throwIfMinus1,
 ) where
@@ -18,8 +15,7 @@ import Foreign.Ptr
 import Foreign.C.String
 import System.Marquise.FFI as F
 
--- | An error indicated by librados, usually in the form of a negative return
--- value
+-- | An error returned by libmarquise
 data MarquiseError = MarquiseError
     { errno     :: Int    -- ^ Error number (positive)
     , cFunction :: String -- ^ The underlying c function that called
@@ -27,17 +23,11 @@ data MarquiseError = MarquiseError
     } deriving (Eq, Ord, Typeable)
 
 instance Show MarquiseError where
-    show MarquiseError{..} = "rados-haskell: rados error in '" ++
+    show MarquiseError{..} = "marquise-haskell: marquise error in '" ++
         cFunction ++ "', errno " ++ show errno ++ ": '" ++ strerror ++ "'"
 
 instance Exception MarquiseError
 
--- Handle a ceph Errno, which is an errno that must be negated before being
--- passed to strerror. Otherwise, treat the result a positive int and pass it
--- straight through.
---
--- This is needed for a few methods like rados_read that throw an error or
--- return the bytes read via the same CInt.
 throwIf :: (a -> Bool) -> String -> IO a -> IO a
 throwIf condition c_function action = do
     r <- action
