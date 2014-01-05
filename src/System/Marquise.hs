@@ -98,18 +98,18 @@ sendText tag_pairs timestamp text =
 
 sendInt :: [(B.ByteString, B.ByteString)] -> Word64 -> Int64 -> Marquise ()
 sendInt tag_pairs timestamp int =
-    withConnFieldsValuesLength "marquise_send_text" tag_pairs $ \c f v l ->
-                F.c_marquise_send_int c f v l int timestamp
+    withConnFieldsValuesLength "marquise_send_text" tag_pairs $ 
+        (flip6 . flip6) F.c_marquise_send_int int timestamp
 
 sendReal :: [(B.ByteString, B.ByteString)] -> Word64 -> Rational -> Marquise ()
 sendReal tag_pairs timestamp r =
-    withConnFieldsValuesLength "marquise_send_real" tag_pairs $ \c f v l ->
-                F.c_marquise_send_real c f v l (fromRational r) timestamp
+    withConnFieldsValuesLength "marquise_send_real" tag_pairs $
+        (flip6 . flip6) F.c_marquise_send_real (fromRational r) timestamp
 
 sendCounter :: [(B.ByteString, B.ByteString)] -> Word64 -> Marquise ()
 sendCounter tag_pairs timestamp =
-    withConnFieldsValuesLength "marquise_send_counter" tag_pairs $ \c f v l ->
-                F.c_marquise_send_counter c f v l timestamp
+    withConnFieldsValuesLength "marquise_send_counter" tag_pairs $
+        flip5 F.c_marquise_send_counter timestamp
 
 sendBinary :: [(B.ByteString, B.ByteString)] -> Word64 -> B.ByteString -> Marquise ()
 sendBinary tag_pairs timestamp text =
@@ -124,3 +124,12 @@ timeNow :: Marquise Word64
 timeNow =
     liftIO $ (+) <$> ((1000000000*) . sec) <*> nsec <$> getTime Realtime
     >>= return . fromIntegral
+
+flip5 :: (a -> b -> c -> d -> e -> f) -> e -> a -> b -> c -> d -> f 
+flip5 = flip . (.) flip4
+  where
+    flip4 = flip . (.) flip3
+    flip3 = flip . (.) flip
+
+flip6 :: (a -> b -> c -> d -> e -> f -> g) -> f -> a -> b -> c -> d -> e -> g
+flip6 = flip . (.) flip5
