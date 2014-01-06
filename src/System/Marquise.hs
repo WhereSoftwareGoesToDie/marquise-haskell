@@ -125,10 +125,10 @@ timeNow = liftM fromIntegral $ liftIO $
     (+) <$> ((1000000000*) . sec) <*> nsec <$> getTime Realtime
 
 flip5 :: (a -> b -> c -> d -> e -> f) -> e -> a -> b -> c -> d -> f 
-flip5 = flip . (.) flip4
+flip5 = flip . (flip4 .)
   where
-    flip4 = flip . (.) flip3
-    flip3 = flip . (.) flip
+    flip4 = flip . (flip3 .)
+    flip3 = flip . (flip .)
 
 flip6 :: (a -> b -> c -> d -> e -> f -> g) -> f -> a -> b -> c -> d -> e -> g
-flip6 = flip . (.) flip5
+flip6 = flip . (flip5 .)
