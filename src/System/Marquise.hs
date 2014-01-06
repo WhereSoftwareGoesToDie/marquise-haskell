@@ -83,7 +83,7 @@ withConnFieldsValuesLength c_function tag_pairs f = do
                                            (fromIntegral $ length tag_pairs)
   where
     withCStringArray :: [B.ByteString] -> (Ptr CString -> IO a) -> IO a
-    withCStringArray bss f' = do
+    withCStringArray bss f' =
             (runCont . mapM cont) (map B.useAsCString bss) $ \cstrings ->
                 SV.unsafeWith (SV.fromList cstrings) f'
 
@@ -121,9 +121,8 @@ sendBinary tag_pairs timestamp text =
                                            timestamp
 
 timeNow :: Marquise Word64
-timeNow =
-    liftIO $ (+) <$> ((1000000000*) . sec) <*> nsec <$> getTime Realtime
-    >>= return . fromIntegral
+timeNow = liftM fromIntegral $ liftIO $
+    (+) <$> ((1000000000*) . sec) <*> nsec <$> getTime Realtime
 
 flip5 :: (a -> b -> c -> d -> e -> f) -> e -> a -> b -> c -> d -> f 
 flip5 = flip . (.) flip4
