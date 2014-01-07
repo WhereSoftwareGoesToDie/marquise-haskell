@@ -98,7 +98,7 @@ sendText tag_pairs timestamp text =
 
 sendInt :: [(B.ByteString, B.ByteString)] -> Word64 -> Int64 -> Marquise ()
 sendInt tag_pairs timestamp int =
-    withConnFieldsValuesLength "marquise_send_text" tag_pairs $ 
+    withConnFieldsValuesLength "marquise_send_int" tag_pairs $
         (flip6 . flip6) F.c_marquise_send_int int timestamp
 
 sendReal :: [(B.ByteString, B.ByteString)] -> Word64 -> Rational -> Marquise ()
